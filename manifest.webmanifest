@@ -1,0 +1,17 @@
+{
+  "name": "סורק קלפי כדורגל",
+  "short_name": "סורק קלפים",
+  "description": "מצלמים קלף כדורגל ומקבלים זיהוי והערכת שווי",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#06090f",
+  "theme_color": "#06090f",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

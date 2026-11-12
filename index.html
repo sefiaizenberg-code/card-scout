@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>סורק קלפי כדורגל</title>
+<meta name="theme-color" content="#06090f">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="סורק קלפים">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Heebo:wght@400;500;700;800&family=Chakra+Petch:wght@500;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --night:#06090f; --surface:#0d141d; --surface-2:#131c28; --line:#1f2b3a;
+  --ink:#eef3f8; --muted:#8597ab;
+  --trophy:#ffc94d; --cyan:#4de1ff; --magenta:#ff5ad9; --turf:#3ee08f;
+  --bad:#ff6b6b;
+  --holo:linear-gradient(115deg,#4de1ff 0%,#a98bff 30%,#ff5ad9 55%,#ffc94d 80%,#4de1ff 100%);
+  --t-common:#8597ab; --t-rare:#4de1ff; --t-epic:#c07bff; --t-legend:#ffc94d;
+  --f-display:"Karantina","Heebo",system-ui,sans-serif;
+  --f-body:"Heebo",system-ui,"Segoe UI",Arial,sans-serif;
+  --f-num:"Chakra Petch","Heebo",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--night);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--night);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;direction:rtl;overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  background-image:radial-gradient(1200px 500px at 50% -180px,rgba(77,225,255,.16),transparent 70%),radial-gradient(700px 400px at 90% 10%,rgba(255,90,217,.08),transparent 70%);
+  background-repeat:no-repeat}
+img{max-width:100%}
+[hidden]{display:none!important}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.05;
+  background:repeating-linear-gradient(90deg,transparent 0 79px,#fff 79px 80px)}
+.wrap{max-width:860px;margin:0 auto;padding-block:22px 70px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:30px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1}
+h2{font-family:var(--f-display);font-weight:700;font-size:40px;letter-spacing:.01em}
+h3{font-family:var(--f-body);font-weight:800;font-size:21px;line-height:1.2}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+.muted{color:var(--muted)}
+.kicker{font-family:var(--f-num);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+a{color:var(--cyan)}
+
+header{display:flex;flex-direction:column;gap:10px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.toptools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(58px,14vw,96px);letter-spacing:.01em;line-height:.85;
+  background:var(--holo);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:foil 8s linear infinite}
+@keyframes foil{to{background-position:200% 0}}
+header .lede{margin:0;max-width:56ch;color:var(--muted);font-size:17px}
+.rate{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 12px}
+.rate input{width:64px;padding:3px 8px;border:0;border-radius:999px;background:var(--surface-2);color:var(--ink);font-family:var(--f-num);font-size:14px}
+
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+.stat .v{font-family:var(--f-num);font-weight:700;font-size:24px;line-height:1.1;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat.hero .v{color:var(--trophy)}
+
+/* settings */
+.settings{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:0}
+.settings summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.settings summary::-webkit-details-marker{display:none}
+.settings summary .state{font-size:13px;font-weight:500}
+.settings .in{padding:0 18px 18px;display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.field input,.field select{font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);width:100%;direction:ltr;text-align:left}
+.field select{direction:rtl;text-align:right}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg label{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--surface-2)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan) inset}
+.seg small{color:var(--muted);font-size:12px}
+.help{font-size:14px;color:#cfd8e2;margin:0;padding:10px 12px;border-radius:10px;background:rgba(77,225,255,.06);border:1px solid rgba(77,225,255,.18)}
+.help ol{margin:6px 0 0;padding-inline-start:20px}
+
+.finder{position:relative;border-radius:20px;padding:22px;background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;gap:16px;isolation:isolate}
+.finder::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:var(--holo);background-size:200% 100%;animation:foil 6s linear infinite;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;z-index:-1;pointer-events:none}
+.finder.drag{box-shadow:0 0 0 3px var(--cyan),0 0 40px rgba(77,225,255,.35)}
+.frame{position:relative;min-height:190px;border-radius:14px;background:radial-gradient(circle at 50% 50%,rgba(77,225,255,.07),transparent 60%),var(--night);
+  display:flex;align-items:center;justify-content:center;padding:18px;overflow:hidden}
+.frame .corner{position:absolute;width:26px;height:26px;border-color:var(--cyan);border-style:solid;border-width:0;opacity:.9}
+.c1{top:10px;right:10px;border-top-width:3px!important;border-right-width:3px!important;border-top-right-radius:8px}
+.c2{top:10px;left:10px;border-top-width:3px!important;border-left-width:3px!important;border-top-left-radius:8px}
+.c3{bottom:10px;right:10px;border-bottom-width:3px!important;border-right-width:3px!important;border-bottom-right-radius:8px}
+.c4{bottom:10px;left:10px;border-bottom-width:3px!important;border-left-width:3px!important;border-bottom-left-radius:8px}
+.placeholder{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);text-align:center}
+.ghost{width:74px;aspect-ratio:5/7;border-radius:8px;border:2px dashed rgba(77,225,255,.5);display:grid;place-items:center;font-family:var(--f-display);font-size:34px;color:var(--cyan)}
+.thumbs{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.thumbs img{height:150px;width:auto;max-width:100%;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.6);object-fit:cover}
+.scanline{position:absolute;left:0;right:0;height:3px;top:0;background:linear-gradient(90deg,transparent,var(--cyan),transparent);box-shadow:0 0 18px 4px rgba(77,225,255,.6);opacity:0;z-index:2}
+.finder.scanning .scanline{opacity:1;animation:scan 1.6s ease-in-out infinite alternate}
+.finder.scanning .frame .corner{animation:pulse 1s ease-in-out infinite alternate}
+@keyframes scan{from{top:4%}to{top:94%}}
+@keyframes pulse{to{opacity:.3}}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hint{font-size:14px;color:var(--muted);margin:0}
+
+button,.btn{font:inherit;font-weight:700;border-radius:12px;padding:11px 18px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:transform .12s,border-color .15s,box-shadow .15s;touch-action:manipulation}
+button:hover,.btn:hover{border-color:var(--cyan);transform:translateY(-1px)}
+button:active,.btn:active{transform:translateY(1px)}
+button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+button.primary{border:0;color:#120c00;background:linear-gradient(135deg,#ffe08a,var(--trophy) 50%,#ff9f43);box-shadow:0 6px 24px rgba(255,201,77,.35)}
+button.primary:hover{box-shadow:0 8px 32px rgba(255,201,77,.55)}
+button.ghostbtn{background:transparent}
+button:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+button.small,.btn.small{padding:7px 13px;font-size:14px;border-radius:10px}
+.ico{width:18px;height:18px;flex:none}
+#installBtn{border-color:var(--turf);color:var(--turf)}
+
+.status{font-size:15px;padding:11px 14px;border-radius:12px;background:rgba(77,225,255,.08);border:1px solid rgba(77,225,255,.25);display:flex;gap:10px;align-items:center}
+.status.err{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.35);color:#ffb3b3}
+.dots::after{content:"";display:inline-block;width:1.2em;text-align:start;animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+.results{display:flex;flex-direction:column;gap:18px}
+.sechead{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.card{--tier:var(--t-common);position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--tier);box-shadow:0 0 20px var(--tier)}
+.card.legend::before{background:var(--holo)}
+.art{position:relative;perspective:700px;width:100%}
+.tilt{position:relative;border-radius:12px;transform-style:preserve-3d;transition:transform .2s ease-out;box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 0 2px var(--tier)}
+.tilt img,.tilt .blank{display:block;width:100%;aspect-ratio:5/7;object-fit:cover;border-radius:12px;background:linear-gradient(160deg,var(--surface-2),var(--night))}
+.tilt .blank{display:grid;place-items:center;font-family:var(--f-display);font-size:54px;color:var(--line)}
+.shine{position:absolute;inset:0;border-radius:12px;pointer-events:none;mix-blend-mode:color-dodge;opacity:0;transition:opacity .2s;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,30%),rgba(255,255,255,.55),transparent 45%),var(--holo);background-blend-mode:overlay}
+.art:hover .shine{opacity:.35}
+.card.legend .shine,.card.epic .shine{opacity:.18}
+.tier{position:absolute;top:-8px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--f-num);font-size:11px;font-weight:700;letter-spacing:.14em;padding:3px 10px;border-radius:999px;background:var(--night);color:var(--tier);border:1px solid var(--tier);white-space:nowrap}
+.body{min-width:0;display:flex;flex-direction:column;gap:12px}
+.who{display:flex;flex-direction:column;gap:4px}
+.who .en{font-family:var(--f-num);font-size:13px;color:var(--muted);letter-spacing:.04em;direction:ltr;text-align:right}
+.meta{font-size:14px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.chip.gold{color:var(--trophy);border-color:rgba(255,201,77,.4);background:rgba(255,201,77,.08)}
+.chip.c-high{color:var(--turf);border-color:rgba(62,224,143,.35)}
+.chip.c-medium{color:var(--trophy);border-color:rgba(255,201,77,.35)}
+.chip.c-low{color:var(--bad);border-color:rgba(255,107,107,.35)}
+.chip.example{background:var(--holo);color:#0b0b12;border:0}
+.value{position:relative;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(255,201,77,.12),rgba(255,90,217,.06));border:1px solid rgba(255,201,77,.25)}
+.value .mid{font-family:var(--f-num);font-size:38px;font-weight:700;line-height:1;color:var(--trophy);text-shadow:0 0 24px rgba(255,201,77,.35)}
+.value .usd{font-size:15px;color:var(--muted)}
+.value .range{flex-basis:100%;font-size:13px;color:var(--muted)}
+.meter{flex-basis:100%;height:6px;border-radius:99px;background:var(--surface-2);position:relative;overflow:hidden}
+.meter i{position:absolute;inset-block:0;right:0;border-radius:99px;background:linear-gradient(270deg,var(--cyan),var(--trophy))}
+.notes{margin:0;font-size:15px;color:#cfd8e2}
+.links{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
+.links a{color:var(--cyan);text-decoration:none;padding:4px 10px;border-radius:999px;border:1px solid rgba(77,225,255,.25)}
+.links a:hover{background:rgba(77,225,255,.1)}
+.live{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px;font-size:15px}
+.src{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.src div{background:var(--surface-2);border-radius:10px;padding:8px 10px;min-width:0}
+.src .k{font-size:12px;color:var(--muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src .num{font-weight:700;font-size:16px}
+.comps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px;font-size:13px}
+.comps li{display:flex;justify-content:space-between;gap:10px;min-width:0;padding:5px 0;border-bottom:1px solid var(--line)}
+.comps li span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;color:#cfd8e2}
+.comps a{color:inherit;text-decoration:none}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.pocket{--tier:var(--t-common);position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0;transition:transform .2s,border-color .2s}
+.pocket:hover{transform:translateY(-3px);border-color:var(--tier)}
+.pocket .tilt{box-shadow:0 8px 20px rgba(0,0,0,.5),0 0 0 2px var(--tier)}
+.pocket .nm{font-weight:800;font-size:15px;line-height:1.25;margin-top:4px}
+.pocket .sm{font-size:12px;color:var(--muted)}
+.pocket .pv{font-family:var(--f-num);font-weight:700;color:var(--trophy)}
+.pocket .rm{align-self:flex-start;font-size:12px;padding:4px 10px}
+.pocket .rm.armed{border-color:var(--bad);color:var(--bad)}
+.groups{display:flex;flex-direction:column;gap:26px}
+.team{display:flex;flex-direction:column;gap:12px}
+.teamhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:8px;border-bottom:2px solid var(--line);position:relative}
+.teamhead::after{content:"";position:absolute;right:0;bottom:-2px;width:64px;height:2px;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.teamhead h3{font-family:var(--f-display);font-weight:700;font-size:32px;line-height:1;letter-spacing:.01em}
+.teamhead .en{font-family:var(--f-num);font-size:12px;color:var(--muted);letter-spacing:.06em;direction:ltr}
+.teamhead .tm{font-size:13px;color:var(--muted);white-space:nowrap}
+.teamhead .tm .num{color:var(--trophy);font-weight:700}
+.empty{grid-column:1/-1;padding:30px 20px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.t-common{--tier:var(--t-common)}.t-rare{--tier:var(--t-rare)}.t-epic{--tier:var(--t-epic)}.t-legend{--tier:var(--t-legend)}
+.backup{display:flex;gap:8px;flex-wrap:wrap}
+
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,30px);opacity:0;z-index:20;background:var(--surface-2);border:1px solid var(--turf);color:var(--ink);padding:10px 18px;border-radius:999px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.5);transition:all .25s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+footer{font-size:13px;color:var(--muted);text-align:center}
+
+/* big screens: laptops and desktops */
+@media (min-width:1100px){
+  .wrap{max-width:1120px}
+  .card{grid-template-columns:200px minmax(0,1fr);padding:22px;gap:26px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+  .frame{min-height:230px}
+  .thumbs img{height:190px}
+}
+@media (max-width:560px){.card{grid-template-columns:1fr}.card .art{max-width:190px;margin-inline:auto}}
+
+/* touch devices: Android phones & tablets */
+@media (hover:none){
+  button:hover,.btn:hover{transform:none;border-color:var(--line)}
+  button.primary:hover{box-shadow:0 6px 24px rgba(255,201,77,.35)}
+  .pocket:hover{transform:none;border-color:var(--line)}
+  .art:hover .shine{opacity:0}
+  .card.legend .shine,.card.epic .shine{opacity:.18}
+  .links a:hover{background:transparent}
+  h1,.finder::before{animation:none}
+}
+
+/* phones (360–480px) */
+@media (max-width:480px){
+  .wrap{gap:22px;padding-block:14px 56px}
+  h2{font-size:34px}
+  header .lede{font-size:15px}
+  .rate input{width:72px;font-size:16px;padding:6px 8px}
+  .stats{gap:8px}
+  .stat{padding:10px;border-radius:12px}
+  .stat .v{font-size:18px}
+  .finder{padding:14px;border-radius:16px;gap:12px}
+  .frame{min-height:170px;padding:14px}
+  .thumbs{gap:8px}
+  .thumbs img{height:120px}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .controls .btn,.controls button{justify-content:center}
+  .controls #go,.controls #clear{grid-column:1/-1}
+  button,.btn{min-height:48px}
+  button.small,.btn.small{min-height:44px;padding:9px 14px}
+  .actions button{flex:1 1 auto;justify-content:center}
+  .card{padding:14px;gap:14px;border-radius:16px}
+  .card .art{max-width:170px}
+  .value{padding:12px 14px}
+  .value .mid{font-size:32px}
+  .links{gap:8px}
+  .links a{padding:8px 12px}
+  .src{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .pocket .rm{min-height:40px;padding:6px 12px}
+  .teamhead h3{font-size:28px}
+  .seg{grid-template-columns:1fr}
+  .settings summary{padding:14px}
+  .settings .in{padding:0 14px 14px}
+}
+@media (max-width:340px){.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}.tilt{transform:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="topline">
+      <span class="kicker">CARD SCOUT · כל הליגות · כל השנים</span>
+      <div class="toptools">
+        <button class="small" id="installBtn" hidden>⬇ התקן אפליקציה</button>
+        <label class="rate" for="rate">₪ לדולר <input id="rate" type="number" inputmode="decimal" step="0.01" min="1" value="3.70"></label>
+      </div>
+    </div>
+    <h1>סורק הקלפים</h1>
+    <p class="lede">מצלמים קלף כדורגל, וה-AI מזהה שחקן, סדרה ושנה, ובודק כמה הוא באמת שווה לפי מכירות אחרונות.</p>
+  </header>
+
+  <div class="stats" aria-label="סיכום האוסף">
+    <div class="stat hero"><span class="v num" id="total">₪0</span><span class="k">שווי האוסף <span id="totalUsd" class="num"></span></span></div>
+    <div class="stat"><span class="v num" id="count">0</span><span class="k">קלפים באוסף</span></div>
+    <div class="stat"><span class="v" id="topCard">—</span><span class="k">הקלף היקר ביותר</span></div>
+  </div>
+
+  <details class="settings" id="settings">
+    <summary><span>⚙ הגדרות זיהוי (מפתח AI)</span><span class="state" id="keyState"></span></summary>
+    <div class="in">
+      <div class="seg" role="radiogroup" aria-label="ספק AI">
+        <label><input type="radio" name="prov" value="gemini" checked><b>Google Gemini</b><small>חינמי לשימוש אישי · מומלץ</small></label>
+        <label><input type="radio" name="prov" value="anthropic"><b>Claude API</b><small>בתשלום לפי שימוש</small></label>
+      </div>
+      <div class="help" id="helpGemini">איך משיגים מפתח חינמי (פעם אחת, דקה):
+        <ol><li>נכנסים ל-<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> עם חשבון Google.</li>
+        <li>לוחצים <b>Create API key</b> ומעתיקים את המפתח.</li>
+        <li>מדביקים אותו כאן למטה ולוחצים "שמור".</li></ol></div>
+      <div class="help" id="helpAnthropic" hidden>מפתח נוצר ב-<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> (דורש אמצעי תשלום). כל סריקה עולה כמה סנטים.</div>
+      <label class="field">מפתח API<input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="הדביקו כאן את המפתח"></label>
+      <label class="field">מודל (אפשר להשאיר כמו שהוא)<input id="model" type="text" autocomplete="off" spellcheck="false"></label>
+      <div class="actions"><button class="primary small" id="saveKey">שמור</button><button class="small" id="testKey">בדוק חיבור</button><button class="small ghostbtn" id="delKey">מחק מפתח</button></div>
+      <p class="hint">המפתח נשמר רק במכשיר הזה ונשלח ישירות לספק ה-AI. בכל מכשיר (טלפון/מחשב) מזינים אותו פעם אחת.</p>
+    </div>
+  </details>
+
+  <section class="finder" id="slot" aria-label="צילום קלפים">
+    <div class="frame">
+      <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
+      <div class="scanline"></div>
+      <div class="placeholder" id="ph"><div class="ghost">?</div><span>שימו כאן קלף: צלמו, בחרו תמונה או גררו אותה</span></div>
+      <div class="thumbs" id="thumbs"></div>
+    </div>
+    <div class="controls">
+      <label class="btn" for="cam"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>צלם קלף</label>
+      <input id="cam" type="file" accept="image/*" capture="environment" hidden>
+      <label class="btn" for="pick"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg>בחר תמונות</label>
+      <input id="pick" type="file" accept="image/*" multiple hidden>
+      <button class="primary" id="go" disabled><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M4 12h16"/></svg>זהה והערך</button>
+      <button class="ghostbtn" id="clear" hidden>מחק תמונות</button>
+    </div>
+    <p class="hint">טיפ: צלמו ישר, באור טוב ובלי השתקפויות. בקלף נדיר כדאי לצלם גם את הגב, כדי לראות מספר סידורי.</p>
+    <div class="status" id="status" hidden></div>
+  </section>
+
+  <section class="results" id="results" aria-live="polite"></section>
+
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div class="sechead">
+      <div><h2>האוסף שלי</h2><span class="muted" style="font-size:14px">נשמר במכשיר הזה. להעברה בין טלפון למחשב: גיבוי ← שחזור.</span></div>
+      <div class="backup">
+        <button class="small" id="exportBtn">⤓ גיבוי לקובץ</button>
+        <label class="btn small" for="importFile">⤒ שחזור מקובץ</label>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+    </div>
+    <div class="groups" id="binder"></div>
+  </section>
+
+  <footer>ההערכות הן אומדן בלבד ולא הצעת מחיר. המחיר בפועל תלוי במצב הקלף, בדירוג (PSA/BGS) ובביקוש באותו רגע.</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const today = new Date().toISOString().slice(0,10);
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ls = { get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){ if(k==="binder") status("אין מספיק מקום לשמירה במכשיר. מחקו כמה קלפים או גבו לקובץ.", true); }} };
+
+let files = [], results = [], binder = ls.get("binder", []);
+
+// ---------- installable app ----------
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; $("#installBtn").hidden = false; });
+$("#installBtn").addEventListener("click", async () => { if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice.catch(()=>{}); installEvt = null; $("#installBtn").hidden = true; });
+window.addEventListener("appinstalled", () => { $("#installBtn").hidden = true; toast("האפליקציה הותקנה ✓"); });
+
+// ---------- currency ----------
+$("#rate").value = ls.get("rate", 3.70);
+const rate = () => Math.max(1, Number($("#rate").value) || 3.7);
+$("#rate").addEventListener("change", () => { ls.set("rate", rate()); renderResults(); renderBinder(); });
+const usd = n => n == null || isNaN(n) ? "—" : "$" + Math.round(n).toLocaleString("en-US");
+const ils = n => n == null || isNaN(n) ? "—" : "₪" + Math.round(n * rate()).toLocaleString("en-US");
+function tier(v){
+  const s = (Number(v)||0) * rate();
+  if (s >= 1000) return {cls:"t-legend", key:"legend", name:"LEGENDARY · אגדי"};
+  if (s >= 200)  return {cls:"t-epic",   key:"epic",   name:"EPIC · אפי"};
+  if (s >= 40)   return {cls:"t-rare",   key:"rare",   name:"RARE · נדיר"};
+  return {cls:"t-common", key:"common", name:"COMMON · רגיל"};
+}
+
+function status(msg, err, busy){ const el=$("#status"); el.hidden=!msg; el.innerHTML = msg ? `<span class="${busy?"dots":""}">${esc(msg)}</span>` : ""; el.classList.toggle("err",!!err); }
+let toastT; function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2400); }
+
+// ---------- AI settings ----------
+const DEFAULT_MODEL = { gemini: "gemini-2.5-flash", anthropic: "claude-sonnet-5-5" };
+let cfg = ls.get("ai", { prov: "gemini", key: "", model: "" });
+const model = () => cfg.model || DEFAULT_MODEL[cfg.prov];
+function showSettings(){
+  document.querySelector(`input[name=prov][value=${cfg.prov}]`).checked = true;
+  $("#apiKey").value = cfg.key || "";
+  $("#model").value = model();
+  $("#helpGemini").hidden = cfg.prov !== "gemini";
+  $("#helpAnthropic").hidden = cfg.prov !== "anthropic";
+  $("#keyState").innerHTML = cfg.key ? `<span style="color:var(--turf)">● מחובר · ${cfg.prov==="gemini"?"Gemini":"Claude"}</span>` : `<span style="color:var(--bad)">● חסר מפתח</span>`;
+}
+document.querySelectorAll("input[name=prov]").forEach(r => r.addEventListener("change", () => {
+  const was = cfg.prov; cfg.prov = r.value;
+  if (!cfg.model || cfg.model === DEFAULT_MODEL[was]) cfg.model = "";
+  $("#model").value = model();
+  $("#helpGemini").hidden = cfg.prov !== "gemini"; $("#helpAnthropic").hidden = cfg.prov !== "anthropic";
+}));
+$("#saveKey").addEventListener("click", () => {
+  cfg.key = $("#apiKey").value.trim(); const m = $("#model").value.trim(); cfg.model = m === DEFAULT_MODEL[cfg.prov] ? "" : m;
+  ls.set("ai", cfg); showSettings(); toast(cfg.key ? "המפתח נשמר ✓" : "אין מפתח"); if (cfg.key) $("#settings").open = false; status("");
+});
+$("#delKey").addEventListener("click", () => { cfg.key = ""; ls.set("ai", cfg); showSettings(); toast("המפתח נמחק"); });
+$("#testKey").addEventListener("click", async e => {
+  cfg.key = $("#apiKey").value.trim(); const m = $("#model").value.trim(); cfg.model = m === DEFAULT_MODEL[cfg.prov] ? "" : m;
+  if (!cfg.key) { toast("הדביקו מפתח קודם"); return; }
+  e.target.disabled = true;
+  try { const r = await ai('Reply with ONLY this JSON: {"ok":true}'); if (r?.ok) { ls.set("ai", cfg); showSettings(); toast("החיבור עובד ✓"); } else throw new Error("bad"); }
+  catch(err) { alertErr(err); }
+  finally { e.target.disabled = false; }
+});
+showSettings();
+if (!cfg.key) $("#settings").open = true;
+
+// ---------- calling the AI directly from the browser ----------
+const toB64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(f); });
+function parseJSON(text){
+  const s = String(text||"").replace(/```json|```/g, "");
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a < 0 || b < a) { const e = new Error("invalid_json"); e.code = "invalid_json"; throw e; }
+  try { return JSON.parse(s.slice(a, b+1)); } catch { const e = new Error("invalid_json"); e.code = "invalid_json"; throw e; }
+}
+async function ai(prompt, { images = [], search = false } = {}){
+  if (!cfg.key) { const e = new Error("no_key"); e.code = "no_key"; throw e; }
+  const imgs = await Promise.all(images.map(async f => ({ mime: f.type || "image/jpeg", data: await toB64(f) })));
+  let res, body;
+  try {
+    if (cfg.prov === "gemini") {
+      const parts = [...imgs.map(i => ({ inline_data: { mime_type: i.mime, data: i.data } })), { text: prompt }];
+      const req = { contents: [{ role: "user", parts }], generationConfig: { temperature: 0.2 } };
+      if (search) req.tools = [{ google_search: {} }]; else req.generationConfig.responseMimeType = "application/json";
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model())}:generateContent`, {
+        method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": cfg.key }, body: JSON.stringify(req) });
+      body = await res.json().catch(()=>({}));
+      if (!res.ok) throw httpErr(res.status, body?.error?.message);
+      const text = (body?.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("\n");
+      if (!text) { const e = new Error("refused"); e.code = "refused"; throw e; }
+      return parseJSON(text);
+    } else {
+      const content = [...imgs.map(i => ({ type: "image", source: { type: "base64", media_type: i.mime, data: i.data } })), { type: "text", text: prompt }];
+      const req = { model: model(), max_tokens: 4096, messages: [{ role: "user", content }] };
+      if (search) req.tools = [{ type: "web_search_20250305", name: "web_search", max_uses: 5 }];
+      res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-api-key": cfg.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+        body: JSON.stringify(req) });
+      body = await res.json().catch(()=>({}));
+      if (!res.ok) throw httpErr(res.status, body?.error?.message);
+      const texts = (body?.content || []).filter(b => b.type === "text").map(b => b.text);
+      return parseJSON(texts.reverse().find(t => t.includes("{")) || texts.join("\n"));
+    }
+  } catch (e) {
+    if (e.code) throw e;
+    const x = new Error("network"); x.code = "network"; throw x;
+  }
+}
+function httpErr(status, msg){
+  const e = new Error(msg || String(status));
+  e.code = status === 400 && /api key|API_KEY/i.test(msg||"") ? "bad_key" : status === 401 || status === 403 ? "bad_key" : status === 429 ? "rate_limited" : status === 404 ? "bad_model" : status === 413 ? "too_big" : "http";
+  e.detail = msg; return e;
+}
+const errText = e => ({
+  no_key: "צריך להזין מפתח AI בהגדרות (פעם אחת). לחצו על ⚙ הגדרות זיהוי.",
+  bad_key: "המפתח לא התקבל. בדקו שהעתקתם אותו במלואו בהגדרות.",
+  bad_model: "שם המודל לא נמצא. החזירו את שדה המודל בהגדרות לברירת המחדל.",
+  rate_limited: "יותר מדי בקשות כרגע (או שנגמרה המכסה היומית החינמית). נסו שוב בעוד דקה.",
+  too_big: "התמונה גדולה מדי. נסו תמונה אחת בכל פעם.",
+  invalid_json: "התשובה לא הגיעה בפורמט תקין. לחצו שוב.",
+  refused: "ה-AI לא החזיר תשובה לתמונה הזו. נסו תמונה אחרת.",
+  network: "אין חיבור לאינטרנט, או שהבקשה נחסמה. בדקו חיבור ונסו שוב."
+}[e?.code] || ("משהו השתבש: " + (e?.detail || e?.message || "")));
+function alertErr(e){ status(errText(e), true); if (e?.code === "no_key" || e?.code === "bad_key" || e?.code === "bad_model") { $("#settings").open = true; $("#settings").scrollIntoView({behavior: reduceMotion?"auto":"smooth"}); } }
+
+// ---------- picking photos ----------
+const MAX_SIDE = 1600;
+async function shrink(f){
+  try {
+    if (f.size < 1.0e6 && /jpe?g|png|webp/.test(f.type)) return f;
+    const bmp = await createImageBitmap(f);
+    const s = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    bmp.close?.();
+    const blob = await new Promise(r => c.toBlob(r, "image/jpeg", 0.86));
+    if (!blob) return f;
+    return new File([blob], (f.name || "card").replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch { return f; }
+}
+let thumbURLs = [];
+async function addFiles(list){
+  const picked = [...(list || [])].filter(f => f.type.startsWith("image/"));
+  if (picked.length) status("מכין את התמונות", false, true);
+  for (const f of picked) files.push(await shrink(f));
+  files = files.slice(-4);
+  thumbURLs.forEach(u => URL.revokeObjectURL(u)); thumbURLs = [];
+  const t=$("#thumbs"); t.innerHTML="";
+  files.forEach(f => { const i=new Image(); const u=URL.createObjectURL(f); thumbURLs.push(u); i.src=u; i.alt="תמונה שנבחרה"; t.append(i); });
+  $("#ph").hidden = !!files.length;
+  $("#go").disabled = !files.length;
+  $("#clear").hidden = !files.length;
+  status(files.length ? `${files.length} תמונות מוכנות. לחצו "זהה והערך".` : "");
+}
+$("#clear").addEventListener("click", () => { files = []; addFiles([]); });
+$("#cam").addEventListener("change", e => { addFiles(e.target.files); e.target.value=""; });
+$("#pick").addEventListener("change", e => { files=[]; addFiles(e.target.files); e.target.value=""; });
+const slot=$("#slot");
+["dragenter","dragover"].forEach(ev=>slot.addEventListener(ev,e=>{e.preventDefault();slot.classList.add("drag")}));
+["dragleave","drop"].forEach(ev=>slot.addEventListener(ev,e=>{e.preventDefault();slot.classList.remove("drag")}));
+slot.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+window.addEventListener("paste", e => { const f=[...(e.clipboardData?.files||[])]; if(f.length) addFiles(f); });
+
+async function cropThumb(file, bbox){
+  const img = await createImageBitmap(file);
+  let [x,y,w,h] = Array.isArray(bbox) && bbox.length===4 ? bbox.map(Number) : [0,0,1,1];
+  if (![x,y,w,h].every(v=>v>=0&&v<=1) || w<0.05 || h<0.05) [x,y,w,h]=[0,0,1,1];
+  const sx=x*img.width, sy=y*img.height, sw=Math.min(w*img.width,img.width-sx), sh=Math.min(h*img.height,img.height-sy);
+  const H=280, W=Math.round(H*sw/sh);
+  const c=document.createElement("canvas"); c.width=W; c.height=H;
+  c.getContext("2d").drawImage(img,sx,sy,sw,sh,0,0,W,H);
+  img.close?.();
+  return c.toDataURL("image/jpeg",0.72);
+}
+
+// ---------- identify ----------
+const ID_PROMPT = () => `You are an expert appraiser of football (soccer) trading cards from every country and era: Panini (Prizm, Select, Donruss, Mosaic, Obsidian, Immaculate, Flawless, World Cup stickers), Topps (Chrome, Finest, Merlin, UCL, Stadium Club, Now), Futera, Upper Deck, Match Attax, Adrenalyn XL, vintage A&BC, local leagues, and more.
+
+The attached image(s) may show one card or several. Images may show the front and back of the same card — merge those into one entry. Identify every distinct card.
+
+For each card, estimate the current market value in USD for the card as it appears (raw/ungraded unless a slab is visible), based on your knowledge of recent eBay sold prices and comparable sales. Give low / mid / high. If the parallel or serial number can't be confirmed, value the most likely version and say so. Today is ${today}; your price knowledge may be dated, so lower confidence for very new cards.
+
+Reply with ONLY this JSON:
+{"cards":[{
+ "player":"name in English", "playerHe":"name in Hebrew letters",
+ "team":"team name in English", "teamHe":"team name in Hebrew letters (e.g. ריאל מדריד, נבחרת ארגנטינה)", "year":"e.g. 2023-24", "manufacturer":"Panini|Topps|...", "set":"e.g. Prizm Premier League",
+ "cardNumber":"", "variant":"base / parallel name / insert name", "serial":"e.g. 12/99 or null",
+ "rookie":false, "autograph":false, "memorabilia":false,
+ "graded":{"company":null,"grade":null},
+ "conditionHe":"short condition note in Hebrew",
+ "confidence":"high|medium|low",
+ "valueUSD":{"low":0,"mid":0,"high":0},
+ "notesHe":"1-2 sentences in Hebrew explaining the value drivers",
+ "searchQuery":"concise English eBay search query for this exact card",
+ "image":0, "bbox":[x,y,w,h]
+}],
+"messageHe":"only if no card is visible: short Hebrew explanation"}
+"image" is the 0-based index of the image that best shows the card front; "bbox" is the card's box in that image as fractions 0-1 of width/height.`;
+
+$("#go").addEventListener("click", async () => {
+  if (!cfg.key) { alertErr({code:"no_key"}); return; }
+  const btn=$("#go"); btn.disabled=true; slot.classList.add("scanning");
+  status("סורק ומזהה את הקלפים. זה לוקח בדרך כלל 10–40 שניות", false, true);
+  try {
+    const shot = files.slice();
+    const out = await ai(ID_PROMPT(), { images: shot });
+    const cards = Array.isArray(out?.cards) ? out.cards : [];
+    if (!cards.length) { status(out?.messageHe || "לא זוהה קלף בתמונה. נסו צילום קרוב וחד יותר.", true); return; }
+    for (const c of cards) {
+      const src = shot[Math.min(Math.max(0, Number(c.image)||0), shot.length-1)];
+      try { c.thumb = await cropThumb(src, c.bbox); } catch { c.thumb = ""; }
+      c.id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random());
+      c.scannedAt = Date.now();
+    }
+    results = cards.concat(results.filter(r=>!r.example));
+    status(`זוהו ${cards.length} קלפים.`);
+    renderResults();
+    $("#results").scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"start"});
+  } catch(e) { alertErr(e); }
+  finally { btn.disabled = !files.length; slot.classList.remove("scanning"); }
+});
+
+// ---------- marketplace links ----------
+const q = c => encodeURIComponent(c.searchQuery || [c.year,c.manufacturer,c.set,c.player,c.variant,c.cardNumber&&"#"+c.cardNumber].filter(Boolean).join(" "));
+const URLS = {
+  ebaySold: c => `https://www.ebay.com/sch/i.html?_nkw=${q(c)}&LH_Sold=1&LH_Complete=1`,
+  ebayLive: c => `https://www.ebay.com/sch/i.html?_nkw=${q(c)}&_sop=15`,
+  pc:       c => `https://www.pricecharting.com/search-products?type=prices&q=${q(c)}`,
+  p130:     c => `https://130point.com/sales/`,
+  google:   c => `https://www.google.com/search?q=${q(c)}+sold+price`
+};
+
+// ---------- live prices via the AI's web search ----------
+async function liveCheck(card, btn){
+  if (!cfg.key) { alertErr({code:"no_key"}); return; }
+  btn.disabled = true; card.liveErr = ""; card.liveStep = "מחפש מכירות אחרונות ברשת (eBay, PriceCharting, 130point)"; renderResults();
+  const desc = JSON.stringify({player:card.player,year:card.year,manufacturer:card.manufacturer,set:card.set,cardNumber:card.cardNumber,variant:card.variant,serial:card.serial,graded:card.graded,autograph:card.autograph});
+  const prompt = `You are pricing this football card: ${desc}
+
+Search the web now for RECENT real sales and prices of this exact card: eBay sold/completed listings, 130point, PriceCharting, and current eBay asking prices. Keep only results that match THIS card (same player, set, year, parallel; same grading status — don't mix PSA 10 with raw unless the card is graded). Convert to USD (ILS≈${rate()} per USD, EUR≈0.92, GBP≈0.79 per USD). Ignore lots, reprints and custom cards. Today is ${today}.
+
+Reply with ONLY JSON, no other text:
+{"sold":[{"title":"","usd":0,"date":"","url":""}],
+ "active":[{"title":"","usd":0,"url":""}],
+ "pricecharting":{"ungraded":null,"psa9":null,"psa10":null,"product":""},
+ "valueUSD":{"low":0,"mid":0,"high":0},
+ "confidence":"high|medium|low",
+ "summaryHe":"1-2 sentences in Hebrew: what the real sales say"}
+List at most 8 sold and 5 active. Base valueUSD mainly on matching sold prices, then PriceCharting, then asking prices (asking prices run high). If you found nothing reliable, return empty lists, keep valueUSD at 0 and say so in summaryHe.`;
+  try {
+    const r = await ai(prompt, { search: true });
+    card.live = { ...r, checkedAt: Date.now() };
+    if (r?.valueUSD?.mid > 0) { card.aiValueUSD = card.aiValueUSD || card.valueUSD; card.valueUSD = r.valueUSD; card.confidence = r.confidence || card.confidence; }
+  } catch(e) { card.liveErr = errText(e); }
+  card.liveStep = ""; renderResults();
+  if (binder.some(b=>b.id===card.id)) saveCard(card, true);
+}
+
+// ---------- render results ----------
+const CONF = {high:"ביטחון גבוה",medium:"ביטחון בינוני",low:"ביטחון נמוך"};
+const safeUrl = u => /^https?:\/\//i.test(String(u||"")) ? String(u) : "";
+function chips(c){
+  const out=[];
+  if (c.example) out.push(`<span class="chip example">דוגמה</span>`);
+  if (c.rookie) out.push(`<span class="chip gold">RC · רוקי</span>`);
+  if (c.autograph) out.push(`<span class="chip gold">✍ חתימה</span>`);
+  if (c.memorabilia) out.push(`<span class="chip gold">פיסת חולצה</span>`);
+  if (c.serial) out.push(`<span class="chip gold num">${esc(c.serial)}</span>`);
+  if (c.graded?.company) out.push(`<span class="chip">${esc(c.graded.company)} ${esc(c.graded.grade??"")}</span>`);
+  if (c.confidence) out.push(`<span class="chip c-${esc(c.confidence)}">${CONF[c.confidence]||""}</span>`);
+  return out.join("");
+}
+function artHTML(c, t){
+  return `<div class="art" data-tilt>
+    <span class="tier">${t.name}</span>
+    <div class="tilt">${c.thumb?`<img src="${c.thumb}" alt="${esc(c.player)}" loading="lazy">`:`<div class="blank">${esc((c.player||"?").slice(0,1))}</div>`}<div class="shine"></div></div>
+  </div>`;
+}
+function liveBlock(c){
+  if (c.liveStep) return `<div class="live"><span class="dots muted">${esc(c.liveStep)}</span></div>`;
+  if (c.liveErr) return `<div class="live"><span style="color:var(--bad)">${esc(c.liveErr)}</span></div>`;
+  const L=c.live; if(!L) return "";
+  const sold=(L.sold||[]).filter(s=>s.usd>0), act=(L.active||[]).filter(s=>s.usd>0);
+  const med = a => { const v=a.map(x=>x.usd).sort((x,y)=>x-y); return v.length? v[Math.floor(v.length/2)] : null; };
+  const pc=L.pricecharting||{};
+  const row = s => { const u = safeUrl(s.url); const t = esc(s.title); return `<li><span title="${t}">${u?`<a href="${esc(u)}" target="_blank" rel="noopener">${t}</a>`:t}</span><span class="num">${ils(s.usd)}${s.date?` · ${esc(s.date)}`:""}</span></li>`; };
+  return `<div class="live">
+    <span class="kicker">מחירים מהרשת · ${new Date(L.checkedAt).toLocaleString("he-IL",{dateStyle:"short",timeStyle:"short"})}</span>
+    <div class="src">
+      <div><span class="k">eBay נמכרו (${sold.length})</span><span class="num">${sold.length?ils(med(sold)):"—"}</span></div>
+      <div><span class="k">eBay מוצעים כעת (${act.length})</span><span class="num">${act.length?ils(med(act)):"—"}</span></div>
+      <div><span class="k" title="${esc(pc.product||"")}">PriceCharting</span><span class="num">${pc.ungraded?ils(pc.ungraded):"—"}</span>${pc.psa10?`<span class="k num">PSA10 ${ils(pc.psa10)}</span>`:""}</div>
+    </div>
+    ${sold.length?`<ul class="comps">${sold.slice(0,5).map(row).join("")}</ul>`:""}
+    ${L.summaryHe?`<p class="notes">${esc(L.summaryHe)}</p>`:""}
+  </div>`;
+}
+function cardHTML(c){
+  const v=c.valueUSD||{}, t=tier(v.mid);
+  const inBinder = binder.some(b=>b.id===c.id);
+  const span = Math.max(1,(v.high||0)-(v.low||0));
+  const pos = v.high ? Math.min(100, Math.max(8, ((v.mid-(v.low||0))/span)*100)) : 0;
+  return `<article class="card ${t.cls} ${t.key}" data-id="${esc(c.id)}">
+    ${artHTML(c,t)}
+    <div class="body">
+      <div class="who"><h3>${esc(c.playerHe||c.player||"שחקן לא מזוהה")}</h3>${c.playerHe&&c.player&&c.playerHe!==c.player?`<span class="en">${esc(c.player)}</span>`:""}
+        <span class="meta">${esc([c.year,c.manufacturer,c.set].filter(Boolean).join(" · "))}${c.cardNumber?` · <span class="num">#${esc(c.cardNumber)}</span>`:""}${c.variant?` · ${esc(c.variant)}`:""}${c.team?` · ${esc(c.team)}`:""}</span>
+      </div>
+      <div class="chips">${chips(c)}</div>
+      <div class="value"><span class="mid num">${ils(v.mid)}</span><span class="usd num">${usd(v.mid)}</span>
+        <div class="meter" aria-hidden="true"><i style="width:${pos}%"></i></div>
+        <span class="range">טווח <span class="num">${ils(v.low)} – ${ils(v.high)}</span> · ${c.live?"לפי מכירות שנמצאו ברשת":"הערכת AI"}</span></div>
+      ${c.notesHe?`<p class="notes">${esc(c.notesHe)}${c.conditionHe?` <span class="muted">מצב: ${esc(c.conditionHe)}</span>`:""}</p>`:""}
+      ${liveBlock(c)}
+      <div class="actions">
+        ${c.example?"":`<button class="small primary" data-act="live">${c.live?"רענן מחירים":"בדוק מחירים אמיתיים"}</button>
+        <button class="small" data-act="save" ${inBinder?"disabled":""}>${inBinder?"באוסף ✓":"+ שמור לאוסף"}</button>`}
+        <button class="small ghostbtn" data-act="dismiss">הסר</button>
+      </div>
+      <div class="links"><span class="muted">בדיקה ידנית:</span>
+        <a href="${URLS.ebaySold(c)}" target="_blank" rel="noopener">eBay נמכרו</a>
+        <a href="${URLS.ebayLive(c)}" target="_blank" rel="noopener">eBay מוצעים</a>
+        <a href="${URLS.pc(c)}" target="_blank" rel="noopener">PriceCharting</a>
+        <a href="${URLS.p130(c)}" target="_blank" rel="noopener">130point</a>
+        <a href="${URLS.google(c)}" target="_blank" rel="noopener">Google</a>
+      </div>
+    </div>
+  </article>`;
+}
+function renderResults(){
+  const el=$("#results");
+  el.innerHTML = results.length ? `<div class="sechead"><h2>תוצאות הסריקה</h2><button class="small ghostbtn" data-act="clearAll">נקה תוצאות</button></div>` + results.map(cardHTML).join("") : "";
+}
+$("#results").addEventListener("click", e => {
+  const b=e.target.closest("button[data-act]"); if(!b) return;
+  if (b.dataset.act==="clearAll") { results = []; renderResults(); return; }
+  const id=b.closest(".card")?.dataset.id;
+  if (b.dataset.act==="dismiss") { results = results.filter(r=>r.id!==id); renderResults(); return; }
+  const c=results.find(r=>r.id===id); if(!c) return;
+  if (b.dataset.act==="live") liveCheck(c,b);
+  if (b.dataset.act==="save") saveCard(c);
+});
+
+if (!reduceMotion) {
+  document.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse") return;
+    const a = e.target.closest?.("[data-tilt]"); if (!a) return;
+    const r = a.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+    const t = a.querySelector(".tilt");
+    t.style.transform = `rotateY(${(x-.5)*18}deg) rotateX(${(.5-y)*18}deg) scale(1.03)`;
+    a.querySelector(".shine")?.style.setProperty("--mx", x*100+"%");
+    a.querySelector(".shine")?.style.setProperty("--my", y*100+"%");
+  });
+  document.addEventListener("pointerout", e => {
+    const a = e.target.closest?.("[data-tilt]"); if (!a || a.contains(e.relatedTarget)) return;
+    a.querySelector(".tilt").style.transform = "";
+  });
+}
+
+// ---------- binder (saved on this device) ----------
+const KEEP = ["id","player","playerHe","team","teamHe","year","manufacturer","set","cardNumber","variant","serial","rookie","autograph","memorabilia","graded","conditionHe","confidence","valueUSD","notesHe","searchQuery","thumb","scannedAt","live"];
+const slim = c => Object.fromEntries(KEEP.filter(k=>c[k]!==undefined).map(k=>[k,c[k]]));
+function persist(){ ls.set("binder", binder); renderBinder(); renderResults(); }
+function saveCard(c, quiet){ binder = binder.filter(b=>b.id!==c.id).concat(slim(c)); persist(); if(!quiet) toast("נשמר לאוסף ✓"); }
+function removeCard(id){ binder = binder.filter(b=>b.id!==id); persist(); toast("הקלף הוסר מהאוסף"); }
+
+$("#exportBtn").addEventListener("click", () => {
+  if (!binder.length) { toast("האוסף ריק"); return; }
+  const blob = new Blob([JSON.stringify({ app:"card-scout", v:1, exported:new Date().toISOString(), cards:binder }, null, 1)], { type:"application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `card-collection-${today}.json`;
+  document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  toast("קובץ הגיבוי ירד ✓");
+});
+$("#importFile").addEventListener("change", async e => {
+  const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text()); const cards = Array.isArray(data) ? data : data.cards;
+    if (!Array.isArray(cards)) throw 0;
+    const ids = new Set(binder.map(b=>b.id)); let added = 0;
+    for (const c of cards) if (c && c.id && !ids.has(c.id)) { binder.push(slim(c)); added++; }
+    persist(); toast(`שוחזרו ${added} קלפים ✓`);
+  } catch { status("הקובץ לא נקרא. בחרו קובץ גיבוי שנוצר באפליקציה.", true); }
+});
+
+let armed=null;
+const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase()
+  .replace(/[-–'’.&]/g," ").split(/\s+/).filter(w => w && !/^(fc|cf|afc|sc|ac|as|sl|cd|ssc|club|de|\d+)$/.test(w)).join(" ");
+const teamKey = c => norm(c.team) || String(c.teamHe||"").trim();
+function renderBinder(){
+  const el=$("#binder");
+  const tot = binder.reduce((s,c)=>s+(Number(c.valueUSD?.mid)||0),0);
+  const sorted = binder.slice().sort((a,b)=>(b.valueUSD?.mid||0)-(a.valueUSD?.mid||0));
+  $("#total").textContent = ils(tot); $("#totalUsd").textContent = binder.length ? "· "+usd(tot) : "";
+  $("#count").textContent = binder.length;
+  $("#topCard").textContent = sorted[0] ? (sorted[0].playerHe||sorted[0].player) : "—";
+  if (!binder.length) { el.innerHTML = `<div class="empty"><div class="ghost">+</div>עוד אין קלפים באוסף. סרקו קלף ולחצו "שמור לאוסף", ותוכלו לעקוב אחרי השווי של כל האוסף.</div>`; return; }
+  const groups = new Map();
+  for (const c of sorted) {
+    const key = teamKey(c);
+    if (!groups.has(key)) groups.set(key, {key, he:c.teamHe||"", en:c.team||"", cards:[], total:0});
+    const g = groups.get(key); g.cards.push(c); g.total += Number(c.valueUSD?.mid)||0;
+    if (!g.he && c.teamHe) g.he = c.teamHe;
+  }
+  const list = [...groups.values()].sort((a,b)=> (a.key===""?1:0)-(b.key===""?1:0) || b.total-a.total);
+  const cnt = n => n===1 ? "קלף אחד" : n+" קלפים";
+  el.innerHTML = list.map(g=>{
+    const title = g.key ? (g.he||g.en) : "ללא קבוצה";
+    const sub = g.key && g.he && g.en && g.he!==g.en ? `<span class="en">${esc(g.en)}</span>` : "";
+    return `<section class="team">
+      <div class="teamhead"><div><h3>${esc(title)}</h3>${sub}</div><span class="tm">${cnt(g.cards.length)} · <span class="num">${ils(g.total)}</span></span></div>
+      <div class="grid">${g.cards.map(pocketHTML).join("")}</div>
+    </section>`;
+  }).join("");
+}
+function pocketHTML(c){ const t=tier(c.valueUSD?.mid); return `
+    <div class="pocket ${t.cls}">
+      ${artHTML(c,t)}
+      <span class="nm">${esc(c.playerHe||c.player)}</span>
+      <span class="sm">${esc([c.year,c.set].filter(Boolean).join(" · "))}</span>
+      <span class="pv">${ils(c.valueUSD?.mid)} <span class="muted num" style="font-weight:500;font-size:12px">${usd(c.valueUSD?.mid)}</span></span>
+      <button class="rm ghostbtn ${armed===c.id?"armed":""}" data-rm="${esc(c.id)}">${armed===c.id?"לחצו שוב למחיקה":"הסר"}</button>
+    </div>`; }
+$("#binder").addEventListener("click", e => {
+  const b=e.target.closest("[data-rm]"); if(!b) return;
+  if (armed===b.dataset.rm) { armed=null; removeCard(b.dataset.rm); }
+  else { armed=b.dataset.rm; renderBinder(); setTimeout(()=>{ if(armed===b.dataset.rm){armed=null;renderBinder();} },4000); }
+});
+
+results = [{
+  id:"example", example:true, player:"Erling Haaland", playerHe:"ארלינג הולאנד", team:"Borussia Dortmund",
+  year:"2020-21", manufacturer:"Topps", set:"Chrome UEFA Champions League", cardNumber:"", variant:"Base",
+  rookie:false, confidence:"medium", valueUSD:{low:8,mid:15,high:25},
+  notesHe:"זו דוגמה בלבד שמראה איך נראית תוצאה. צלמו קלף משלכם כדי לקבל הערכה אמיתית.",
+  searchQuery:"2020-21 Topps Chrome UCL Erling Haaland", thumb:""
+}];
+renderResults(); renderBinder();
+})();
+</script>
+</body>
+</html>
