@@ -185,6 +185,33 @@ button.small,.btn.small{padding:7px 13px;font-size:14px;border-radius:10px}
 .empty{grid-column:1/-1;padding:30px 20px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
 .t-common{--tier:var(--t-common)}.t-rare{--tier:var(--t-rare)}.t-epic{--tier:var(--t-epic)}.t-legend{--tier:var(--t-legend)}
 .backup{display:flex;gap:8px;flex-wrap:wrap}
+.tools{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:8px}
+.tools input,.tools select,.dlg input,.dlg select{font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);width:100%;min-width:0}
+.refresh{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.refresh .prog{font-size:14px;color:var(--muted);flex:1 1 200px;min-width:0}
+.refresh .bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:6px}
+.refresh .bar i{display:block;height:100%;width:0;background:linear-gradient(270deg,var(--cyan),var(--trophy));transition:width .3s}
+.trend{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.trend svg{width:100%;height:90px;display:block;overflow:visible}
+.trend .row{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.dup{position:absolute;top:6px;right:6px;z-index:4;font-family:var(--f-num);font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--magenta);color:#14000f}
+.pocket .acts{display:flex;gap:6px;flex-wrap:wrap}
+.pocket .fresh{font-size:11px;color:var(--turf)}
+dialog.dlg{width:min(560px,calc(100% - 24px));max-height:calc(100dvh - 24px);border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);padding:0;direction:rtl}
+dialog.dlg::backdrop{background:rgba(0,0,0,.7)}
+.dlg form{display:flex;flex-direction:column;gap:12px;padding:18px}
+.dlg .head{display:flex;gap:14px;align-items:center}
+.dlg .head img,.dlg .head .blank{width:70px;aspect-ratio:5/7;object-fit:cover;border-radius:8px;background:var(--surface-2);flex:none}
+.dlg .f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dlg label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+.dlg .ltr{direction:ltr;text-align:left}
+.dlg .checks{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--ink)}
+.dlg .checks label{flex-direction:row;align-items:center;gap:6px;color:var(--ink)}
+.dlg .checks input{width:auto}
+.dlg .hist{font-size:13px;color:var(--muted);margin:0}
+.dlg .btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between}
+.dlg .btns div{display:flex;gap:8px;flex-wrap:wrap}
+.dlg .del.armed{border-color:var(--bad);color:var(--bad)}
 
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,30px);opacity:0;z-index:20;background:var(--surface-2);border:1px solid var(--turf);color:var(--ink);padding:10px 18px;border-radius:999px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.5);transition:all .25s;pointer-events:none;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -241,6 +268,11 @@ footer{font-size:13px;color:var(--muted);text-align:center}
   .pocket .rm{min-height:40px;padding:6px 12px}
   .teamhead h3{font-size:28px}
   .seg{grid-template-columns:1fr}
+  .tools{grid-template-columns:1fr 1fr}
+  .tools #search{grid-column:1/-1}
+  .dlg .f2{grid-template-columns:1fr}
+  .dlg form{padding:14px}
+  .refresh button{flex:1 1 auto;justify-content:center}
   .settings summary{padding:14px}
   .settings .in{padding:0 14px 14px}
 }
@@ -267,6 +299,8 @@ footer{font-size:13px;color:var(--muted);text-align:center}
     <div class="stat"><span class="v num" id="count">0</span><span class="k">קלפים באוסף</span></div>
     <div class="stat"><span class="v" id="topCard">—</span><span class="k">הקלף היקר ביותר</span></div>
   </div>
+
+  <div class="trend" id="trend" hidden></div>
 
   <details class="settings" id="settings">
     <summary><span>⚙ הגדרות זיהוי (מפתח AI)</span><span class="state" id="keyState"></span></summary>
@@ -317,12 +351,61 @@ footer{font-size:13px;color:var(--muted);text-align:center}
         <input id="importFile" type="file" accept="application/json,.json" hidden>
       </div>
     </div>
+    <div class="tools">
+      <input id="search" type="search" placeholder="🔍 חיפוש: שחקן, קבוצה, סדרה, שנה" autocomplete="off">
+      <select id="sort" aria-label="מיון">
+        <option value="value">מהיקר לזול</option>
+        <option value="cheap">מהזול ליקר</option>
+        <option value="new">נוספו לאחרונה</option>
+        <option value="name">לפי שם שחקן</option>
+        <option value="year">לפי שנה</option>
+      </select>
+      <select id="view" aria-label="תצוגה">
+        <option value="team">לפי קבוצה</option>
+        <option value="flat">רשימה אחת</option>
+        <option value="dups">כפילויות</option>
+      </select>
+    </div>
+    <div class="refresh">
+      <div class="prog"><span id="refreshText">רענון מחירים לכל האוסף לפי מכירות אחרונות ברשת. מתחיל מהקלפים היקרים, ומדלג על מה שנבדק בשבוע האחרון.</span><div class="bar" id="refreshBar" hidden><i></i></div></div>
+      <button class="small primary" id="refreshAll">↻ רענן מחירים</button>
+      <button class="small" id="refreshStop" hidden>עצור</button>
+    </div>
     <div class="groups" id="binder"></div>
   </section>
 
   <footer>ההערכות הן אומדן בלבד ולא הצעת מחיר. המחיר בפועל תלוי במצב הקלף, בדירוג (PSA/BGS) ובביקוש באותו רגע.</footer>
 </div>
 <div class="toast" id="toast" role="status"></div>
+<dialog class="dlg" id="editDlg">
+  <form method="dialog" id="editForm">
+    <div class="head"><div id="eThumb"></div><div><h3 id="eTitle"></h3><span class="muted" id="eSub" style="font-size:13px"></span></div></div>
+    <div class="f2">
+      <label>שם השחקן (עברית)<input name="playerHe"></label>
+      <label>שם השחקן (אנגלית)<input name="player" class="ltr"></label>
+      <label>קבוצה (עברית)<input name="teamHe"></label>
+      <label>קבוצה (אנגלית)<input name="team" class="ltr"></label>
+      <label>שנה<input name="year" class="ltr"></label>
+      <label>יצרן<input name="manufacturer" class="ltr"></label>
+      <label>סדרה<input name="set" class="ltr"></label>
+      <label>גרסה / פרלל<input name="variant" class="ltr"></label>
+      <label>מספר קלף<input name="cardNumber" class="ltr"></label>
+      <label>מספר סידורי (למשל 12/99)<input name="serial" class="ltr"></label>
+      <label>שווי משוער ב-₪<input name="valueIls" type="number" inputmode="decimal" min="0" step="1" class="ltr"></label>
+      <label>דירוג (למשל PSA 10)<input name="grade" class="ltr"></label>
+    </div>
+    <div class="checks">
+      <label><input type="checkbox" name="rookie"> רוקי</label>
+      <label><input type="checkbox" name="autograph"> חתימה</label>
+      <label><input type="checkbox" name="memorabilia"> פיסת חולצה</label>
+    </div>
+    <p class="hist" id="eHist"></p>
+    <div class="btns">
+      <div><button class="small primary" value="save" id="eSave" autofocus>שמור</button><button class="small" type="button" id="eLive">↻ בדוק מחיר</button><button class="small ghostbtn" value="cancel" formnovalidate>ביטול</button></div>
+      <button class="small ghostbtn del" type="button" id="eDel">מחק מהאוסף</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
 (() => {
@@ -351,7 +434,7 @@ window.addEventListener("appinstalled", () => { $("#installBtn").hidden = true; 
 // ---------- currency ----------
 $("#rate").value = ls.get("rate", 3.70);
 const rate = () => Math.max(1, Number($("#rate").value) || 3.7);
-$("#rate").addEventListener("change", () => { ls.set("rate", rate()); renderResults(); renderBinder(); });
+$("#rate").addEventListener("change", () => { ls.set("rate", rate()); renderResults(); renderBinder(); renderTrend(); });
 const usd = n => n == null || isNaN(n) ? "—" : "$" + Math.round(n).toLocaleString("en-US");
 const ils = n => n == null || isNaN(n) ? "—" : "₪" + Math.round(n * rate()).toLocaleString("en-US");
 function tier(v){
@@ -567,9 +650,7 @@ const URLS = {
 };
 
 // ---------- live prices via the AI's web search ----------
-async function liveCheck(card, btn){
-  if (!cfg.key) { alertErr({code:"no_key"}); return; }
-  btn.disabled = true; card.liveErr = ""; card.liveStep = "מחפש מכירות אחרונות ברשת (eBay, PriceCharting, 130point)"; renderResults();
+async function fetchLive(card){
   const desc = JSON.stringify({player:card.player,year:card.year,manufacturer:card.manufacturer,set:card.set,cardNumber:card.cardNumber,variant:card.variant,serial:card.serial,graded:card.graded,autograph:card.autograph});
   const prompt = `You are pricing this football card: ${desc}
 
@@ -583,11 +664,18 @@ Reply with ONLY JSON, no other text:
  "confidence":"high|medium|low",
  "summaryHe":"1-2 sentences in Hebrew: what the real sales say"}
 List at most 8 sold and 5 active. Base valueUSD mainly on matching sold prices, then PriceCharting, then asking prices (asking prices run high). If you found nothing reliable, return empty lists, keep valueUSD at 0 and say so in summaryHe.`;
-  try {
-    const r = await ai(prompt, { search: true });
-    card.live = { ...r, checkedAt: Date.now() };
-    if (r?.valueUSD?.mid > 0) { card.aiValueUSD = card.aiValueUSD || card.valueUSD; card.valueUSD = r.valueUSD; card.confidence = r.confidence || card.confidence; }
-  } catch(e) { card.liveErr = errText(e); }
+  const r = await ai(prompt, { search: true });
+  card.live = { ...r, checkedAt: Date.now() };
+  if (r?.valueUSD?.mid > 0) {
+    card.aiValueUSD = card.aiValueUSD || card.valueUSD; card.valueUSD = r.valueUSD; card.confidence = r.confidence || card.confidence;
+    card.priceHistory = (card.priceHistory || []).concat({ t: Date.now(), mid: r.valueUSD.mid }).slice(-24);
+  }
+  return card;
+}
+async function liveCheck(card, btn){
+  if (!cfg.key) { alertErr({code:"no_key"}); return; }
+  btn.disabled = true; card.liveErr = ""; card.liveStep = "מחפש מכירות אחרונות ברשת (eBay, PriceCharting, 130point)"; renderResults();
+  try { await fetchLive(card); } catch(e) { card.liveErr = errText(e); }
   card.liveStep = ""; renderResults();
   if (binder.some(b=>b.id===card.id)) saveCard(card, true);
 }
@@ -694,11 +782,42 @@ if (!reduceMotion) {
 }
 
 // ---------- binder (saved on this device) ----------
-const KEEP = ["id","player","playerHe","team","teamHe","year","manufacturer","set","cardNumber","variant","serial","rookie","autograph","memorabilia","graded","conditionHe","confidence","valueUSD","notesHe","searchQuery","thumb","scannedAt","live"];
+const KEEP = ["id","player","playerHe","team","teamHe","year","manufacturer","set","cardNumber","variant","serial","rookie","autograph","memorabilia","graded","conditionHe","confidence","valueUSD","notesHe","searchQuery","thumb","scannedAt","live","priceHistory","aiValueUSD","edited"];
 const slim = c => Object.fromEntries(KEEP.filter(k=>c[k]!==undefined).map(k=>[k,c[k]]));
 function persist(){
-  renderBinder(); renderResults();
+  renderBinder(); renderResults(); recordHistory();
   idb.set("binder", binder).catch(() => ls.set("binder", binder));
+}
+// ---------- collection value over time (one point per day) ----------
+let history = [];
+const totalUSD = () => binder.reduce((s,c)=>s+(Number(c.valueUSD?.mid)||0),0);
+function recordHistory(){
+  if (!binder.length) return;
+  const d = new Date().toISOString().slice(0,10), pt = { d, usd: Math.round(totalUSD()*100)/100, n: binder.length };
+  if (history.length && history[history.length-1].d === d) history[history.length-1] = pt; else history.push(pt);
+  history = history.slice(-400);
+  idb.set("history", history).catch(()=>{});
+  renderTrend();
+}
+function renderTrend(){
+  const el = $("#trend");
+  if (history.length < 1 || !binder.length) { el.hidden = true; return; }
+  el.hidden = false;
+  const pts = history.map(h => h.usd * rate());
+  const first = pts[0], last = pts[pts.length-1], diff = last - first;
+  const W = 600, H = 90, min = Math.min(...pts), max = Math.max(...pts), span = Math.max(1, max - min);
+  const xy = pts.map((v,i) => [pts.length === 1 ? W : i*(W/(pts.length-1)), H - 8 - (v-min)/span*(H-16)]);
+  const line = xy.map(p => p.map(n=>n.toFixed(1)).join(",")).join(" ");
+  const area = `0,${H} ${line} ${W},${H}`;
+  const fmt = d => new Date(d).toLocaleDateString("he-IL",{day:"numeric",month:"short"});
+  el.innerHTML = `<div class="row"><span>שווי האוסף לאורך זמן</span><span class="num" style="color:${diff>=0?"var(--turf)":"var(--bad)"}">${history.length>1?(diff>=0?"▲ ":"▼ ")+"₪"+Math.abs(Math.round(diff)).toLocaleString("en-US"):""}</span></div>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="גרף שווי האוסף">
+      <defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc94d" stop-opacity=".35"/><stop offset="1" stop-color="#ffc94d" stop-opacity="0"/></linearGradient></defs>
+      <polygon points="${area}" fill="url(#tg)"/>
+      <polyline points="${line}" fill="none" stroke="#ffc94d" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+      ${xy.length===1?`<circle cx="${xy[0][0]-4}" cy="${xy[0][1]}" r="4" fill="#ffc94d"/>`:""}
+    </svg>
+    <div class="row"><span>${fmt(history[0].d)}</span><span>${history.length===1?"הנקודה הראשונה. הגרף יתמלא עם כל רענון מחירים":fmt(history[history.length-1].d)}</span></div>`;
 }
 function saveCard(c, quiet){ binder = binder.filter(b=>b.id!==c.id).concat(slim(c)); persist(); if(!quiet) toast("נשמר לאוסף ✓"); }
 function removeCard(id){ binder = binder.filter(b=>b.id!==id); persist(); toast("הקלף הוסר מהאוסף"); }
@@ -733,14 +852,34 @@ function renderBinder(){
   $("#count").textContent = binder.length;
   $("#topCard").textContent = sorted[0] ? (sorted[0].playerHe||sorted[0].player) : "—";
   if (!binder.length) { el.innerHTML = `<div class="empty"><div class="ghost">+</div>עוד אין קלפים באוסף. סרקו קלף ולחצו "שמור לאוסף", ותוכלו לעקוב אחרי השווי של כל האוסף.</div>`; return; }
+  dupCount = new Map(); for (const c of binder) { const k = dupKey(c); dupCount.set(k, (dupCount.get(k)||0)+1); }
+  const qs = norm($("#search").value).split(" ").filter(Boolean);
+  const view = $("#view").value, sortBy = $("#sort").value;
+  let shown = binder.filter(c => {
+    if (view === "dups" && dupCount.get(dupKey(c)) < 2) return false;
+    if (!qs.length) return true;
+    const hay = norm([c.player,c.playerHe,c.team,c.teamHe,c.year,c.manufacturer,c.set,c.variant,c.cardNumber,c.serial].join(" ")) + " " + [c.playerHe,c.teamHe].join(" ");
+    return qs.every(w => hay.includes(w));
+  });
+  const val = c => Number(c.valueUSD?.mid)||0;
+  const cmp = { value:(a,b)=>val(b)-val(a), cheap:(a,b)=>val(a)-val(b), new:(a,b)=>(b.scannedAt||0)-(a.scannedAt||0),
+    name:(a,b)=>String(a.playerHe||a.player||"").localeCompare(String(b.playerHe||b.player||""),"he"),
+    year:(a,b)=>String(b.year||"").localeCompare(String(a.year||"")) || val(b)-val(a) }[sortBy];
+  shown.sort(view === "dups" ? ((a,b)=>dupKey(a).localeCompare(dupKey(b)) || cmp(a,b)) : cmp);
+  if (!shown.length) { el.innerHTML = `<div class="empty">${view==="dups"?"אין כפילויות באוסף 👍":"לא נמצאו קלפים שמתאימים לחיפוש."}</div>`; return; }
+  if (view !== "team") {
+    const sum = shown.reduce((s,c)=>s+val(c),0);
+    el.innerHTML = `<section class="team"><div class="teamhead"><div><h3>${view==="dups"?"כפילויות":(qs.length?"תוצאות חיפוש":"כל הקלפים")}</h3></div><span class="tm">${shown.length} קלפים · <span class="num">${ils(sum)}</span></span></div><div class="grid">${shown.map(pocketHTML).join("")}</div></section>`;
+    return;
+  }
   const groups = new Map();
-  for (const c of sorted) {
+  for (const c of shown) {
     const key = teamKey(c);
     if (!groups.has(key)) groups.set(key, {key, he:c.teamHe||"", en:c.team||"", cards:[], total:0});
     const g = groups.get(key); g.cards.push(c); g.total += Number(c.valueUSD?.mid)||0;
     if (!g.he && c.teamHe) g.he = c.teamHe;
   }
-  const list = [...groups.values()].sort((a,b)=> (a.key===""?1:0)-(b.key===""?1:0) || b.total-a.total);
+  const list = [...groups.values()].sort((a,b)=> (a.key===""?1:0)-(b.key===""?1:0) || (sortBy==="name"||sortBy==="year"||sortBy==="new" ? 0 : sortBy==="cheap" ? a.total-b.total : b.total-a.total));
   const cnt = n => n===1 ? "קלף אחד" : n+" קלפים";
   el.innerHTML = list.map(g=>{
     const title = g.key ? (g.he||g.en) : "ללא קבוצה";
@@ -757,12 +896,109 @@ function pocketHTML(c){ const t=tier(c.valueUSD?.mid); return `
       <span class="nm">${esc(c.playerHe||c.player)}</span>
       <span class="sm">${esc([c.year,c.set].filter(Boolean).join(" · "))}</span>
       <span class="pv">${ils(c.valueUSD?.mid)} <span class="muted num" style="font-weight:500;font-size:12px">${usd(c.valueUSD?.mid)}</span></span>
-      <button class="rm ghostbtn ${armed===c.id?"armed":""}" data-rm="${esc(c.id)}">${armed===c.id?"לחצו שוב למחיקה":"הסר"}</button>
+      ${c.live?.checkedAt?`<span class="fresh">✓ מחיר נבדק ${new Date(c.live.checkedAt).toLocaleDateString("he-IL",{day:"numeric",month:"numeric"})}</span>`:""}
+      <div class="acts"><button class="rm ghostbtn" data-edit="${esc(c.id)}">✎ ערוך</button></div>
+      ${dupCount.get(dupKey(c))>1?`<span class="dup">×${dupCount.get(dupKey(c))}</span>`:""}
     </div>`; }
 $("#binder").addEventListener("click", e => {
-  const b=e.target.closest("[data-rm]"); if(!b) return;
-  if (armed===b.dataset.rm) { armed=null; removeCard(b.dataset.rm); }
-  else { armed=b.dataset.rm; renderBinder(); setTimeout(()=>{ if(armed===b.dataset.rm){armed=null;renderBinder();} },4000); }
+  const b = e.target.closest("[data-edit]"); if (b) { openEdit(b.dataset.edit); return; }
+  const p = e.target.closest(".pocket .art"); if (p) { const id = p.closest(".pocket").querySelector("[data-edit]")?.dataset.edit; if (id) openEdit(id); }
+});
+let dupCount = new Map();
+const dupKey = c => [norm(c.player)||String(c.playerHe||""), norm(c.year), norm(c.manufacturer), norm(c.set), norm(c.variant), norm(c.cardNumber), norm(c.serial)].join("|");
+let searchT; $("#search").addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(renderBinder, 150); });
+$("#sort").addEventListener("change", () => { ls.set("sort", $("#sort").value); renderBinder(); });
+$("#view").addEventListener("change", () => { ls.set("view", $("#view").value); renderBinder(); });
+$("#sort").value = ls.get("sort", "value"); $("#view").value = ls.get("view", "team");
+
+// ---------- edit dialog ----------
+let editing = null, delArmed = false;
+const dlg = $("#editDlg"), form = $("#editForm");
+function openEdit(id){
+  const c = binder.find(b => b.id === id); if (!c) return;
+  editing = c; delArmed = false; $("#eDel").classList.remove("armed"); $("#eDel").textContent = "מחק מהאוסף";
+  $("#eThumb").innerHTML = c.thumb ? `<img src="${c.thumb}" alt="">` : `<div class="blank"></div>`;
+  $("#eTitle").textContent = c.playerHe || c.player || "קלף";
+  $("#eSub").textContent = [c.year, c.set].filter(Boolean).join(" · ");
+  for (const k of ["playerHe","player","teamHe","team","year","manufacturer","set","variant","cardNumber","serial"]) form.elements[k].value = c[k] ?? "";
+  form.elements.valueIls.value = c.valueUSD?.mid ? Math.round(c.valueUSD.mid * rate()) : "";
+  form.elements.grade.value = c.graded?.company ? `${c.graded.company} ${c.graded.grade ?? ""}`.trim() : "";
+  for (const k of ["rookie","autograph","memorabilia"]) form.elements[k].checked = !!c[k];
+  const h = (c.priceHistory || []).slice(-6);
+  $("#eHist").innerHTML = h.length ? "היסטוריית מחיר: " + h.map(x => `<span class="num">${ils(x.mid)}</span> (${new Date(x.t).toLocaleDateString("he-IL",{day:"numeric",month:"numeric"})})`).join(" ← ") : "עוד אין היסטוריית מחיר. לחצו \"בדוק מחיר\" כדי להתחיל.";
+  $("#eLive").disabled = false; $("#eLive").textContent = "↻ בדוק מחיר";
+  dlg.showModal();
+}
+form.addEventListener("submit", e => {
+  if (e.submitter?.value !== "save" || !editing) return;
+  const c = editing, f = form.elements;
+  for (const k of ["playerHe","player","teamHe","team","year","manufacturer","set","variant","cardNumber","serial"]) c[k] = f[k].value.trim() || (k==="serial" ? null : "");
+  for (const k of ["rookie","autograph","memorabilia"]) c[k] = f[k].checked;
+  const g = f.grade.value.trim().match(/^([A-Za-z]+)\s*([\d.]+)?/);
+  c.graded = g ? { company: g[1].toUpperCase(), grade: g[2] ?? null } : { company: null, grade: null };
+  const ils2 = Number(f.valueIls.value);
+  if (ils2 > 0) {
+    const mid = ils2 / rate(), old = c.valueUSD || {};
+    if (!old.mid || Math.abs(old.mid - mid) > 0.01) {
+      const r = old.mid ? mid / old.mid : 1;
+      c.valueUSD = { low: Math.round((old.low ? old.low * r : mid * 0.7) * 100) / 100, mid: Math.round(mid * 100) / 100, high: Math.round((old.high ? old.high * r : mid * 1.4) * 100) / 100 };
+      c.edited = true;
+    }
+  }
+  c.searchQuery = [c.year, c.manufacturer, c.set, c.player, c.variant, c.cardNumber && "#" + c.cardNumber].filter(Boolean).join(" ");
+  persist(); toast("הקלף עודכן ✓");
+});
+$("#eLive").addEventListener("click", async e => {
+  if (!editing) return;
+  if (!cfg.key) { dlg.close(); alertErr({code:"no_key"}); return; }
+  const btn = e.currentTarget; btn.disabled = true; btn.innerHTML = `<span class="dots">בודק</span>`;
+  try { await fetchLive(editing); persist(); dlg.close(); toast(`מחיר עודכן: ${ils(editing.valueUSD?.mid)}`); }
+  catch(err) { btn.disabled = false; btn.textContent = "↻ בדוק מחיר"; $("#eHist").textContent = errText(err); }
+});
+$("#eDel").addEventListener("click", () => {
+  if (!editing) return;
+  if (!delArmed) { delArmed = true; $("#eDel").classList.add("armed"); $("#eDel").textContent = "לחצו שוב למחיקה"; return; }
+  const id = editing.id; dlg.close(); removeCard(id);
+});
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+
+// ---------- refresh prices for the whole collection ----------
+let refreshing = false, stopReq = false, wake = null;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const WEEK = 7*24*3600e3;
+$("#refreshStop").addEventListener("click", () => { stopReq = true; $("#refreshText").textContent = "עוצר אחרי הקלף הנוכחי…"; });
+$("#refreshAll").addEventListener("click", async () => {
+  if (refreshing) return;
+  if (!cfg.key) { alertErr({code:"no_key"}); return; }
+  const queue = binder.filter(c => !(c.live?.checkedAt > Date.now() - WEEK)).sort((a,b)=>(b.valueUSD?.mid||0)-(a.valueUSD?.mid||0));
+  if (!queue.length) { toast("כל הקלפים כבר נבדקו בשבוע האחרון ✓"); return; }
+  refreshing = true; stopReq = false;
+  $("#refreshAll").hidden = true; $("#refreshStop").hidden = false; $("#refreshBar").hidden = false;
+  try { wake = await navigator.wakeLock?.request("screen"); } catch {}
+  const before = totalUSD(); let done = 0, failed = 0, msg = "";
+  for (const c of queue) {
+    if (stopReq) break;
+    $("#refreshText").innerHTML = `<span class="dots">בודק ${done+1} מתוך ${queue.length}: ${esc(c.playerHe||c.player||"")}</span> · השאירו את האפליקציה פתוחה`;
+    $("#refreshBar i").style.width = (done/queue.length*100) + "%";
+    let ok = false;
+    for (let attempt = 0; attempt < 2 && !ok && !stopReq; attempt++) {
+      try { await fetchLive(c); ok = true; }
+      catch(e) {
+        if (e.code === "rate_limited" && attempt === 0) { $("#refreshText").textContent = "הגענו למגבלת קצב. ממתין דקה וממשיך…"; await sleep(62000); continue; }
+        if (e.code === "rate_limited" || e.code === "bad_key" || e.code === "no_key" || e.code === "network") { msg = errText(e); stopReq = true; }
+        break;
+      }
+    }
+    if (ok) { done++; persist(); } else if (!stopReq) { failed++; done++; }
+    if (!stopReq) await sleep(4500);
+  }
+  try { await wake?.release(); } catch {}
+  refreshing = false;
+  $("#refreshAll").hidden = false; $("#refreshStop").hidden = true; $("#refreshBar").hidden = true;
+  const diff = (totalUSD() - before) * rate();
+  const left = binder.filter(c => !(c.live?.checkedAt > Date.now() - WEEK)).length;
+  $("#refreshText").innerHTML = `${msg ? esc(msg) + " " : ""}עודכנו ${done - failed} קלפים${failed?`, ${failed} לא נמצאו`:""}. שינוי בשווי: <span class="num" style="color:${diff>=0?"var(--turf)":"var(--bad)"}">${diff>=0?"+":"−"}₪${Math.abs(Math.round(diff)).toLocaleString("en-US")}</span>${left?` · נשארו ${left} קלפים. לחצו שוב כדי להמשיך.`:""}`;
+  persist();
 });
 
 results = [{
@@ -779,8 +1015,9 @@ renderResults(); renderBinder();
     const old = ls.get("binder", null);
     if (!saved && Array.isArray(old)) { saved = old; await idb.set("binder", saved); try { localStorage.removeItem("binder"); } catch {} }
     binder = Array.isArray(saved) ? saved : [];
+    history = (await idb.get("history")) || [];
   } catch { binder = ls.get("binder", []); }
-  renderBinder(); renderResults();
+  renderBinder(); renderResults(); recordHistory(); renderTrend();
 })();
 })();
 </script>
