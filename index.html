@@ -332,7 +332,14 @@ const today = new Date().toISOString().slice(0,10);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const ls = { get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){ if(k==="binder") status("אין מספיק מקום לשמירה במכשיר. מחקו כמה קלפים או גבו לקובץ.", true); }} };
 
-let files = [], results = [], binder = ls.get("binder", []);
+let files = [], results = [], binder = [];
+// collection lives in IndexedDB (room for thousands of cards); localStorage is only a fallback
+const idb = {
+  _db: null,
+  open(){ return this._db || (this._db = new Promise((res, rej) => { const r = indexedDB.open("card-scout", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); },
+  async get(k){ const db = await this.open(); return new Promise((res, rej) => { const t = db.transaction("kv").objectStore("kv").get(k); t.onsuccess = () => res(t.result); t.onerror = () => rej(t.error); }); },
+  async set(k, v){ const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction("kv", "readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); }
+};
 
 // ---------- installable app ----------
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
@@ -689,7 +696,10 @@ if (!reduceMotion) {
 // ---------- binder (saved on this device) ----------
 const KEEP = ["id","player","playerHe","team","teamHe","year","manufacturer","set","cardNumber","variant","serial","rookie","autograph","memorabilia","graded","conditionHe","confidence","valueUSD","notesHe","searchQuery","thumb","scannedAt","live"];
 const slim = c => Object.fromEntries(KEEP.filter(k=>c[k]!==undefined).map(k=>[k,c[k]]));
-function persist(){ ls.set("binder", binder); renderBinder(); renderResults(); }
+function persist(){
+  renderBinder(); renderResults();
+  idb.set("binder", binder).catch(() => ls.set("binder", binder));
+}
 function saveCard(c, quiet){ binder = binder.filter(b=>b.id!==c.id).concat(slim(c)); persist(); if(!quiet) toast("נשמר לאוסף ✓"); }
 function removeCard(id){ binder = binder.filter(b=>b.id!==id); persist(); toast("הקלף הוסר מהאוסף"); }
 
@@ -707,7 +717,7 @@ $("#importFile").addEventListener("change", async e => {
     if (!Array.isArray(cards)) throw 0;
     const ids = new Set(binder.map(b=>b.id)); let added = 0;
     for (const c of cards) if (c && c.id && !ids.has(c.id)) { binder.push(slim(c)); added++; }
-    persist(); toast(`שוחזרו ${added} קלפים ✓`);
+    persist(); toast(`שוחזרו ${added} קלפים ✓`); status("");
   } catch { status("הקובץ לא נקרא. בחרו קובץ גיבוי שנוצר באפליקציה.", true); }
 });
 
@@ -763,6 +773,15 @@ results = [{
   searchQuery:"2020-21 Topps Chrome UCL Erling Haaland", thumb:""
 }];
 renderResults(); renderBinder();
+(async () => {
+  try {
+    let saved = await idb.get("binder");
+    const old = ls.get("binder", null);
+    if (!saved && Array.isArray(old)) { saved = old; await idb.set("binder", saved); try { localStorage.removeItem("binder"); } catch {} }
+    binder = Array.isArray(saved) ? saved : [];
+  } catch { binder = ls.get("binder", []); }
+  renderBinder(); renderResults();
+})();
 })();
 </script>
 </body>
